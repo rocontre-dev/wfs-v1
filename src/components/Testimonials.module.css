@@ -1,0 +1,126 @@
+/* ============================================
+   Testimonials - Client Reviews Section
+   ============================================ */
+
+.testimonials {
+  position: relative;
+  overflow: hidden;
+}
+
+.testimonialsBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.testimonialsGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    var(--color-primary-950) 0%, 
+    var(--color-primary-900) 50%,
+    var(--color-gray-900) 100%
+  );
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-6);
+}
+
+/* Card */
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  backdrop-filter: blur(8px);
+  transition: all var(--transition-slow);
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.quoteIcon {
+  color: var(--color-gold-400);
+  opacity: 0.8;
+}
+
+.rating {
+  display: flex;
+  gap: 2px;
+}
+
+.content {
+  font-size: var(--text-base);
+  color: var(--color-primary-100);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-6);
+  font-style: italic;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-800));
+  color: var(--color-white);
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-gold-500);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-white);
+}
+
+.role {
+  font-size: var(--text-sm);
+  color: var(--color-primary-300);
+}
+
+/* Desktop Styles */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

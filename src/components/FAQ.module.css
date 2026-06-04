@@ -1,0 +1,128 @@
+/* ============================================
+   FAQ - Frequently Asked Questions
+   ============================================ */
+
+.faq {
+  background-color: var(--color-white);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  max-width: 800px;
+  margin: 0 auto var(--space-12);
+}
+
+/* Item */
+.item {
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.item:hover {
+  background-color: var(--color-primary-50);
+}
+
+.itemOpen {
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-soft-lg);
+}
+
+/* Question */
+.question {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-5) var(--space-6);
+  text-align: left;
+  background: none;
+  cursor: pointer;
+}
+
+.questionNumber {
+  flex-shrink: 0;
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--color-primary-600);
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+}
+
+.questionText {
+  flex: 1;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-gray-900);
+  line-height: var(--leading-tight);
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--color-gray-400);
+  transition: transform var(--transition-base);
+}
+
+.itemOpen .chevron {
+  transform: rotate(180deg);
+}
+
+/* Answer */
+.answerWrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-slower);
+}
+
+.itemOpen .answerWrapper {
+  max-height: 500px;
+}
+
+.answer {
+  padding: 0 var(--space-6) var(--space-5);
+  padding-left: calc(36px + var(--space-4) + var(--space-6));
+  font-size: var(--text-base);
+  color: var(--color-gray-600);
+  line-height: var(--leading-relaxed);
+}
+
+/* CTA */
+.ctaWrapper {
+  text-align: center;
+}
+
+.ctaText {
+  font-size: var(--text-lg);
+  color: var(--color-gray-600);
+  margin-bottom: var(--space-4);
+}
+
+/* Desktop Styles */
+@media (min-width: 768px) {
+  .grid {
+    gap: var(--space-3);
+  }
+
+  .question {
+    padding: var(--space-6);
+  }
+
+  .answer {
+    padding: 0 var(--space-6) var(--space-6);
+  }
+}

@@ -1,0 +1,145 @@
+/* ============================================
+   Resources - Educational Content Section
+   ============================================ */
+
+.resources {
+  background-color: var(--color-gray-50);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+/* Card */
+.card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+/* Card Image */
+.cardImage {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+}
+
+.placeholder--blue {
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+}
+
+.placeholder--green {
+  background: linear-gradient(135deg, #10B981, #059669);
+}
+
+.placeholder--purple {
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+}
+
+/* Card Content */
+.cardContent {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cardTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-900);
+  margin: 0;
+  line-height: var(--leading-tight);
+}
+
+.cardDescription {
+  font-size: var(--text-base);
+  color: var(--color-gray-600);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+  flex: 1;
+}
+
+/* Card Button */
+.cardButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-500);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: not-allowed;
+  transition: all var(--transition-base);
+  align-self: flex-start;
+}
+
+/* Note */
+.note {
+  text-align: center;
+  margin-top: var(--space-8);
+  padding: var(--space-4);
+}
+
+.note p {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Desktop Styles */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .cardImage {
+    height: 200px;
+  }
+
+  .cardContent {
+    padding: var(--space-8);
+  }
+
+  .cardTitle {
+    font-size: var(--text-2xl);
+  }
+}

@@ -1,0 +1,301 @@
+/* ============================================
+   About - Personal Introduction Section
+   ============================================ */
+
+.about {
+  background-color: var(--color-white);
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+/* Content */
+.content {
+  max-width: 600px;
+}
+
+.header {
+  margin-bottom: var(--space-6);
+}
+
+.subtitleBlock {
+  margin-top: var(--space-4);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary-700);
+}
+
+.subtitleDesc {
+  margin: 0;
+  margin-top: var(--space-2);
+  font-size: var(--text-base);
+  color: var(--color-gray-600);
+  line-height: var(--leading-relaxed);
+}
+
+/* Intro & Bio Section */
+.introSection {
+  margin-bottom: var(--space-6);
+}
+
+.intro {
+  font-size: var(--text-lg);
+  color: var(--color-gray-700);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-4);
+}
+
+.bio {
+  font-size: var(--text-base);
+  color: var(--color-gray-600);
+  line-height: var(--leading-relaxed);
+}
+
+/* Approach Card - Mi Enfoque */
+.approachCard {
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  border-left: 4px solid var(--color-primary-600);
+}
+
+.approachHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.approachIcon {
+  color: var(--color-primary-600);
+  flex-shrink: 0;
+}
+
+.approachTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary-800);
+  margin: 0;
+}
+
+.approachText {
+  font-size: var(--text-base);
+  color: var(--color-gray-700);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
+/* Certifications Card */
+.certificationsCard {
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  margin-bottom: var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  border: 1px solid var(--color-gray-200);
+}
+
+.certificationsHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.certificationsIcon {
+  color: var(--color-gold-600);
+  flex-shrink: 0;
+}
+
+.certificationsTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-900);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.certificationsText {
+  font-size: var(--text-sm);
+  color: var(--color-gray-600);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
+/* Legacy styles - keeping for compatibility */
+.descriptionWrapper {
+  margin-bottom: var(--space-8);
+}
+
+.description {
+  font-size: var(--text-lg);
+  color: var(--color-gray-600);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-4);
+}
+
+.mission {
+  font-size: var(--text-lg);
+  color: var(--color-primary-700);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-relaxed);
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--color-gold-500);
+}
+
+/* Signature */
+.signature {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.signatureLine {
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-gray-900), transparent);
+}
+
+.signatureName {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-900);
+}
+
+.signatureTitle {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+}
+
+/* Visual */
+.visual {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.imageContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.imagePlaceholder {
+  width: 280px;
+  height: 280px;
+  border-radius: var(--radius-3xl);
+  background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-900));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  font-weight: var(--font-bold);
+  color: var(--color-white);
+  box-shadow: var(--shadow-2xl);
+}
+
+.imageAccent {
+  position: absolute;
+  inset: -20px;
+  border: 2px solid var(--color-gold-500);
+  border-radius: var(--radius-3xl);
+  opacity: 0.3;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.statCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-base);
+}
+
+.statCard:hover {
+  background-color: var(--color-primary-50);
+  transform: translateY(-2px);
+}
+
+.statIcon {
+  flex-shrink: 0;
+  color: var(--color-primary-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.statKey {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-900);
+  margin-bottom: var(--space-1);
+}
+
+.statDesc {
+  font-size: var(--text-xs);
+  color: var(--color-gray-500);
+  line-height: var(--leading-tight);
+}
+
+/* Desktop Styles */
+@media (min-width: 1024px) {
+  .container {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-16);
+  }
+
+  .content {
+    order: 1;
+  }
+
+  .visual {
+    order: 2;
+  }
+
+  .imagePlaceholder {
+    width: 350px;
+    height: 350px;
+    font-size: 6rem;
+  }
+
+  .imageAccent {
+    inset: -30px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .imagePlaceholder {
+    width: 400px;
+    height: 400px;
+    font-size: 7rem;
+  }
+}

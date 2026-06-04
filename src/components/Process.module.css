@@ -1,0 +1,137 @@
+/* ============================================
+   Process - Step by Step Timeline
+   ============================================ */
+
+.process {
+  background-color: var(--color-gray-50);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-16);
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: 800px;
+  margin: 0 auto var(--space-12);
+}
+
+/* Step */
+.step {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  position: relative;
+}
+
+.stepNumber {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-900));
+  color: var(--color-white);
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  border-radius: var(--radius-xl);
+  z-index: 1;
+}
+
+/* Connector */
+.stepConnector {
+  position: absolute;
+  left: 28px;
+  top: 56px;
+  bottom: -32px;
+  width: 2px;
+  display: flex;
+  justify-content: center;
+}
+
+.step:last-child .stepConnector {
+  display: none;
+}
+
+.connectorLine {
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--color-primary-300), var(--color-primary-200));
+}
+
+/* Step Content */
+.stepContent {
+  flex: 1;
+  padding: var(--space-5) var(--space-6);
+  background-color: var(--color-white);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-soft);
+  transition: all var(--transition-slow);
+}
+
+.stepContent:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateX(8px);
+}
+
+.stepIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
+  border-radius: var(--radius-lg);
+  color: var(--color-primary-600);
+  margin-bottom: var(--space-3);
+}
+
+.stepTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-900);
+  margin-bottom: var(--space-2);
+}
+
+.stepDescription {
+  font-size: var(--text-sm);
+  color: var(--color-gray-600);
+  line-height: var(--leading-relaxed);
+}
+
+/* CTA */
+.ctaWrapper {
+  text-align: center;
+}
+
+/* Desktop Styles */
+@media (min-width: 768px) {
+  .timeline {
+    gap: var(--space-4);
+  }
+
+  .step {
+    gap: var(--space-6);
+  }
+
+  .stepNumber {
+    width: 64px;
+    height: 64px;
+    font-size: var(--text-2xl);
+  }
+
+  .stepConnector {
+    left: 32px;
+  }
+
+  .stepContent {
+    padding: var(--space-6);
+  }
+}
