@@ -50,7 +50,6 @@ const Services = () => {
       <div className="container">
         <div className={styles.header}>
           <span className="badge badge--gold">{t('header.services')}</span>
-          <h2 className="section__title">{t('services.title')}</h2>
           <p className="section__subtitle">{t('services.subtitle')}</p>
         </div>
 

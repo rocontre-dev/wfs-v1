@@ -13,7 +13,7 @@ const Hero = () => {
     },
     {
       icon: <Award size={24} />,
-      value: 'Canadá y EE. UU.',
+      value: t('hero.experienceValue'),
       label: t('hero.experience'),
     },
     {

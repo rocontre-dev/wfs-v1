@@ -81,7 +81,7 @@ const About = () => {
           <div className={styles.signature}>
             <div className={styles.signatureLine} />
             <span className={styles.signatureName}>Gregorio Leñero</span>
-            <span className={styles.signatureTitle}>Asesor Financiero Certificado</span>
+            <span className={styles.signatureTitle}>{t('about.signatureTitle')}</span>
           </div>
         </div>
 

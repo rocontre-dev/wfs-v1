@@ -36,19 +36,19 @@ const Contact = () => {
   const contactCards = [
     {
       icon: <MessageCircle size={24} />,
-      country: 'MÉXICO',
+      country: t('contact.countryMexico'),
       label: t('contact.mexico'),
       phone: '+52 55 1234 5678',
       whatsappNumber: '525512345678',
-      methods: ['WhatsApp', 'Llamadas'],
+      methods: [t('contact.methodWhatsApp'), t('contact.methodCalls')],
     },
     {
       icon: <Phone size={24} />,
-      country: 'CANADÁ',
+      country: t('contact.countryCanada'),
       label: t('contact.canada'),
       phone: '+1 250-608-8218',
       whatsappNumber: '12506088218',
-      methods: ['Llamadas', 'Mensajes de texto'],
+      methods: [t('contact.methodCalls'), t('contact.methodTexts')],
     },
   ];
 

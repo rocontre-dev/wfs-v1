@@ -33,7 +33,7 @@ const Header = () => {
           <span className={styles.logoIcon}>GL</span>
           <span className={styles.logoText}>
             <span className={styles.logoName}>Gregorio Leñero</span>
-            <span className={styles.logoTitle}>Asesor Financiero</span>
+            <span className={styles.logoTitle}>{t('header.logoTitle')}</span>
           </span>
         </a>
 

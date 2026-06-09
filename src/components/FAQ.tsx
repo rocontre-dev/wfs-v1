@@ -29,8 +29,6 @@ const FAQ = () => {
       <div className="container">
         <div className={styles.header}>
           <span className="badge badge--gold">{t('header.faq')}</span>
-          <h2 className="section__title">{t('faq.title')}</h2>
-          <p className="section__subtitle">{t('faq.subtitle')}</p>
         </div>
 
         <div className={styles.grid}>
