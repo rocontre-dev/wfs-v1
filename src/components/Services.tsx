@@ -3,6 +3,7 @@ import {
   Shield, 
   TrendingUp, 
   PiggyBank, 
+  Briefcase, 
   FileText, 
   Lock, 
   Users 
@@ -27,6 +28,11 @@ const Services = () => {
       icon: <PiggyBank size={32} />,
       title: t('services.retirement'),
       description: t('services.retirement.desc'),
+    },
+    {
+      icon: <Briefcase size={32} />,
+      title: t('services.business'),
+      description: t('services.business.desc'),
     },
     {
       icon: <FileText size={32} />,
