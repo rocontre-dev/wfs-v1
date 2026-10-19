@@ -36,7 +36,8 @@
 /* Grid */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  /* min() keeps a single column inside very narrow (320px) viewports. */
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: var(--space-6);
 }
 
@@ -66,11 +67,6 @@
 .quoteIcon {
   color: var(--color-gold-400);
   opacity: 0.8;
-}
-
-.rating {
-  display: flex;
-  gap: 2px;
 }
 
 .content {
@@ -118,7 +114,194 @@
   color: var(--color-primary-300);
 }
 
-/* Desktop Styles */
+.shareWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-12);
+}
+
+.shareWrapper button {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.formPanel {
+  max-width: 760px;
+  margin: var(--space-8) auto 0;
+  /* Fixed header is 80px tall; keep the form heading visible below it. */
+  scroll-margin-top: calc(80px + var(--space-6));
+  padding: var(--space-8);
+  background-color: var(--color-white);
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--shadow-soft-lg);
+  color: var(--color-gray-900);
+}
+
+.formHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.formTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  margin: 0;
+}
+
+.formTitle:focus {
+  outline: none;
+}
+
+.formTitle:focus-visible {
+  outline: 3px solid var(--color-primary-300);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.closeButton {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-primary-900);
+  background-color: transparent;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background-color: var(--color-gray-50);
+}
+
+.closeButton:focus-visible {
+  outline: 3px solid var(--color-primary-300);
+  outline-offset: 2px;
+}
+
+.formIntro,
+.hint,
+.submitStatus {
+  color: var(--color-gray-600);
+  line-height: var(--leading-relaxed);
+}
+
+.formIntro {
+  margin-bottom: var(--space-6);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-gray-700);
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--color-gray-900);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
+}
+
+.textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.input:focus {
+  outline: 3px solid var(--color-primary-300);
+  outline-offset: 2px;
+  border-color: var(--color-primary-500);
+}
+
+.input[aria-invalid='true'] {
+  border-color: #b42318;
+}
+
+.hint,
+.fieldError,
+.formError,
+.submitStatus {
+  font-size: var(--text-sm);
+}
+
+.fieldError,
+.formError {
+  color: #912018;
+}
+
+.notice {
+  padding: var(--space-4);
+  color: var(--color-gray-700);
+  background-color: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  line-height: var(--leading-relaxed);
+}
+
+.submit {
+  min-height: 48px;
+  padding: var(--space-3) var(--space-6);
+  font: inherit;
+  font-weight: var(--font-semibold);
+  color: var(--color-white);
+  background-color: var(--color-primary-900);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.submit:hover:not(:disabled) {
+  background-color: var(--color-primary-800);
+}
+
+.submit:focus-visible {
+  outline: 3px solid var(--color-primary-300);
+  outline-offset: 3px;
+}
+
+.submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .formPanel {
+    padding: var(--space-5);
+    border-radius: var(--radius-2xl);
+  }
+}
+
 @media (min-width: 768px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
