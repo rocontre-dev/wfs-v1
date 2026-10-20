@@ -1,5 +1,3 @@
-export const TESTIMONIAL_NOTICE_VERSION = '2026-10-17';
-
 export const TESTIMONIAL_NOTICE = {
   es: 'Al enviar tu testimonio, autorizas su posible publicación en este sitio. Podremos editarlo ligeramente para mayor claridad, sin cambiar su significado. Tu correo no se publicará. El envío no garantiza su publicación.',
   en: 'By submitting your testimonial, you authorize its possible publication on this site. We may lightly edit it for clarity without changing its meaning. Your email will not be published. Submission does not guarantee publication.',
@@ -26,24 +24,20 @@ export const TESTIMONIAL_LIMITS = {
   emailMax: 254,
   textMin: 30,
   textMax: 1500,
-  honeypotMax: 200,
 } as const;
 
-export type TestimonialField = 'name' | 'email' | 'serviceId' | 'text' | 'form';
+export type TestimonialField = 'name' | 'email' | 'serviceId' | 'text';
 
 export interface TestimonialSubmission {
   name: string;
   email: string;
   serviceId: string;
   text: string;
-  noticeVersion: string;
-  language: string;
-  honeypot: string;
 }
 
 export interface FieldError {
   field: TestimonialField;
-  code: 'required' | 'too_short' | 'too_long' | 'invalid' | 'honeypot' | 'notice';
+  code: 'required' | 'too_short' | 'too_long' | 'invalid';
 }
 
 export interface ValidatedTestimonial {
@@ -51,13 +45,11 @@ export interface ValidatedTestimonial {
   email: string;
   serviceId: ServiceId;
   text: string;
-  noticeVersion: typeof TESTIMONIAL_NOTICE_VERSION;
-  language: TestimonialLanguage;
 }
 
 export type ValidationResult =
   | { ok: true; value: ValidatedTestimonial }
-  | { ok: false; errors: FieldError[]; honeypot: boolean };
+  | { ok: false; errors: FieldError[] };
 
 function hasDisallowedControl(value: string): boolean {
   for (const character of value) {
@@ -90,10 +82,6 @@ export function validateTestimonialSubmission(
 ): ValidationResult {
   const errors: FieldError[] = [];
   const source = input ?? {};
-  const honeypot = typeof source.honeypot === 'string' ? source.honeypot : '';
-
-  if (honeypot !== '') push(errors, 'form', 'honeypot');
-  if (honeypot.length > TESTIMONIAL_LIMITS.honeypotMax) push(errors, 'form', 'too_long');
 
   const name = typeof source.name === 'string' ? normalizeSpaces(source.name) : '';
   if (!name) {
@@ -106,8 +94,8 @@ export function validateTestimonialSubmission(
     push(errors, 'name', 'invalid');
   }
 
-  const email =
-    typeof source.email === 'string' ? source.email.normalize('NFC').trim().toLowerCase() : '';
+  // Kept exactly as typed, apart from leading and trailing spaces.
+  const email = typeof source.email === 'string' ? source.email.trim() : '';
   if (!email) {
     push(errors, 'email', 'required');
   } else if ([...email].length > TESTIMONIAL_LIMITS.emailMax) {
@@ -133,22 +121,66 @@ export function validateTestimonialSubmission(
     push(errors, 'text', 'invalid');
   }
 
-  if (source.noticeVersion !== TESTIMONIAL_NOTICE_VERSION) push(errors, 'form', 'notice');
+  if (errors.length > 0) return { ok: false, errors };
 
-  const language = source.language === 'es' || source.language === 'en' ? source.language : '';
-  if (!language) push(errors, 'form', 'invalid');
+  return { ok: true, value: { name, email, serviceId: serviceId as ServiceId, text } };
+}
 
-  if (errors.length > 0) return { ok: false, errors, honeypot: honeypot !== '' };
+// Recipient of the prepared email. Empty until Goyo's address is confirmed; while empty, the form cannot
+// open mailto or copy the message. Once set, it is visible in the page source (mailto is public).
+// See docs/testimonial-email.md.
+export const TESTIMONIAL_RECIPIENT: string = '';
 
+const MAIL_TEXT = {
+  es: {
+    subject: 'Testimonio para el sitio web',
+    name: 'Nombre público o iniciales',
+    email: 'Correo de contacto',
+    service: 'Servicio contratado',
+    text: 'Testimonio',
+    consent: 'Autorizo la posible publicación de este testimonio en el sitio. Puede editarse ligeramente para mayor claridad, sin cambiar su significado. Mi correo no se publicará.',
+  },
+  en: {
+    subject: 'Testimonial for the website',
+    name: 'Public name or initials',
+    email: 'Contact email',
+    service: 'Contracted service',
+    text: 'Testimonial',
+    consent: 'I authorize the possible publication of this testimonial on the site. It may be lightly edited for clarity without changing its meaning. My email will not be published.',
+  },
+} as const;
+
+// Prepared message, used both for the mailto link and for "Copy message". The email typed in the form is
+// only contact information inside the message; the visitor's mail app decides which account sends it.
+export function buildTestimonialMessage(
+  value: ValidatedTestimonial,
+  language: TestimonialLanguage,
+  serviceLabel: string,
+): { subject: string; body: string } {
+  const text = MAIL_TEXT[language];
   return {
-    ok: true,
-    value: {
-      name,
-      email,
-      serviceId: serviceId as ServiceId,
-      text,
-      noticeVersion: TESTIMONIAL_NOTICE_VERSION,
-      language: language as TestimonialLanguage,
-    },
+    subject: `${text.subject}: ${value.name}`,
+    body: [
+      `${text.name}: ${value.name}`,
+      `${text.email}: ${value.email}`,
+      `${text.service}: ${serviceLabel}`,
+      '',
+      `${text.text}:`,
+      value.text,
+      '',
+      text.consent,
+    ].join('\n'),
   };
+}
+
+// Subject and body are encoded separately so accents, line breaks and characters such as & ? # survive.
+// mailto bodies use CRLF line breaks (RFC 6068). Returns null without a recipient, so no link to an
+// empty address can be built.
+export function buildTestimonialMailto(
+  { subject, body }: { subject: string; body: string },
+  recipient: string = TESTIMONIAL_RECIPIENT,
+): string | null {
+  if (recipient.trim() === '') return null;
+  return `mailto:${recipient.trim()}?subject=${encodeURIComponent(subject)}` +
+    `&body=${encodeURIComponent(body.replace(/\n/g, '\r\n'))}`;
 }

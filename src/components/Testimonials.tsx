@@ -5,7 +5,9 @@ import {
   SERVICE_IDS,
   TESTIMONIAL_LIMITS,
   TESTIMONIAL_NOTICE,
-  TESTIMONIAL_NOTICE_VERSION,
+  TESTIMONIAL_RECIPIENT,
+  buildTestimonialMailto,
+  buildTestimonialMessage,
   validateTestimonialSubmission,
   type FieldError,
   type ServiceId,
@@ -14,16 +16,19 @@ import {
 } from '../shared/testimonialSubmission';
 import styles from './Testimonials.module.css';
 
-// Stays false until a server endpoint exists and the form sends a real request to it.
-const SUBMISSION_ENABLED = false;
+// Temporarily off until Goyo's final address replaces TESTIMONIAL_RECIPIENT. While off, the form and
+// draft keep working but "Send by email" and "Copy message" are disabled and Enter does nothing.
+// Set to true to reactivate both actions; they also stay off while TESTIMONIAL_RECIPIENT is empty.
+const SUBMISSIONS_ENABLED = false;
+const ACTIONS_ENABLED = SUBMISSIONS_ENABLED && TESTIMONIAL_RECIPIENT.trim() !== '';
 
 const FORM_PANEL_ID = 'testimonial-form-panel';
 const FIELD_ORDER: TestimonialField[] = ['name', 'email', 'serviceId', 'text'];
 
-type TestimonialDraft = Omit<TestimonialSubmission, 'noticeVersion' | 'language'>;
+type TestimonialDraft = TestimonialSubmission;
 type DraftField = keyof TestimonialDraft;
 
-const EMPTY_DRAFT: TestimonialDraft = { name: '', email: '', serviceId: '', text: '', honeypot: '' };
+const EMPTY_DRAFT: TestimonialDraft = { name: '', email: '', serviceId: '', text: '' };
 
 const serviceLabelKey = (id: ServiceId): string =>
   id === 'other' || id === 'unspecified' ? `testimonials.form.service.${id}` : `services.${id}`;
@@ -161,14 +166,22 @@ interface TestimonialFormProps {
 function TestimonialForm({ panelRef, headingRef, draft, setDraft, onClose }: TestimonialFormProps) {
   const { t, language } = useLanguage();
   const [errors, setErrors] = useState<FieldError[]>([]);
+  // Result of "Copy message": 'failed' shows the prepared text so it can be selected by hand.
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [fallbackText, setFallbackText] = useState('');
+  const fallbackRef = useRef<HTMLTextAreaElement>(null);
 
   const errorFor = (field: TestimonialField) => errors.find((error) => error.field === field);
-  const formError = errorFor('form');
 
   const update = (field: DraftField, value: string) => {
     setDraft((current) => ({ ...current, [field]: value }));
-    setErrors((current) => current.filter((error) => error.field !== field && error.field !== 'form'));
+    setErrors((current) => current.filter((error) => error.field !== field));
+    setCopyState('idle'); // a copied or displayed message no longer matches the edited draft
   };
+
+  useEffect(() => {
+    if (copyState === 'failed') fallbackRef.current?.select();
+  }, [copyState]);
 
   const errorText = (error: FieldError): string => {
     const limits: Partial<Record<TestimonialField, [number, number]>> = {
@@ -189,19 +202,44 @@ function TestimonialForm({ panelRef, headingRef, draft, setDraft, onClose }: Tes
     return error ? <p id={`${field}-error`} className={styles.fieldError} role="alert">{errorText(error)}</p> : null;
   };
 
-  // The submit button is disabled while SUBMISSION_ENABLED is false, so nothing is validated or sent
-  // yet. When the endpoint is connected, send result.value and report success only after the server
-  // confirms that the mail provider accepted the message.
+  // Validates the draft and returns the prepared message, or shows the errors and returns null.
+  const prepareMessage = () => {
+    const result = validateTestimonialSubmission(draft);
+    if (!result.ok) {
+      setErrors(result.errors);
+      const firstField = FIELD_ORDER.find((field) => result.errors.some((error) => error.field === field));
+      if (firstField) document.getElementById(`testimonial-${firstField}`)?.focus();
+      return null;
+    }
+    setErrors([]);
+    return buildTestimonialMessage(result.value, language, t(serviceLabelKey(result.value.serviceId)));
+  };
+
+  // Opens the visitor's mail app directly from the click, then closes the form and returns focus to the
+  // share button. The visitor sends the message from there, so the page never claims it was sent, and the
+  // draft is kept (it lives in the parent) in case they reopen the form. Invalid input keeps it open.
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!SUBMISSION_ENABLED) return;
+    if (!ACTIONS_ENABLED) return; // also blocks implicit submission with Enter
+    const message = prepareMessage();
+    const link = message && buildTestimonialMailto(message);
+    if (!link) return;
+    window.location.href = link;
+    onClose();
+  };
 
-    const result = validateTestimonialSubmission({ ...draft, noticeVersion: TESTIMONIAL_NOTICE_VERSION, language });
-    if (!result.ok) {
-      const visibleErrors = result.honeypot ? [] : result.errors;
-      setErrors(visibleErrors);
-      const firstField = FIELD_ORDER.find((field) => visibleErrors.some((error) => error.field === field));
-      if (firstField) document.getElementById(`testimonial-${firstField}`)?.focus();
+  // Secondary option for visitors without a mail app: copies the prepared body. If the clipboard is
+  // unavailable or refused, the text is shown selected so it can be copied by hand.
+  const handleCopy = async () => {
+    if (!ACTIONS_ENABLED) return;
+    const message = prepareMessage();
+    if (!message) return;
+    setFallbackText(message.body);
+    try {
+      await navigator.clipboard.writeText(message.body);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
     }
   };
 
@@ -218,12 +256,6 @@ function TestimonialForm({ panelRef, headingRef, draft, setDraft, onClose }: Tes
       </div>
       <p className={styles.formIntro}>{t('testimonials.form.intro')}</p>
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <div className={styles.honeypot} aria-hidden="true">
-          <label htmlFor="testimonial-company">Company</label>
-          <input id="testimonial-company" name="company" type="text" value={draft.honeypot}
-            onChange={(event) => update('honeypot', event.target.value)}
-            tabIndex={-1} autoComplete="off" inputMode="none" />
-        </div>
         <div className={styles.field}>
           <label className={styles.label} htmlFor="testimonial-name">{t('testimonials.form.name')}</label>
           <input id="testimonial-name" className={styles.input} name="name" type="text" value={draft.name}
@@ -267,10 +299,29 @@ function TestimonialForm({ panelRef, headingRef, draft, setDraft, onClose }: Tes
           {fieldError('text')}
         </div>
         <p className={styles.notice} id="testimonial-notice">{TESTIMONIAL_NOTICE[language]}</p>
-        {formError && <p className={styles.formError} role="alert">{errorText(formError)}</p>}
-        <p id="submit-status" className={styles.submitStatus}>{t('testimonials.form.unavailable')}</p>
-        <button className={styles.submit} type="submit" disabled={!SUBMISSION_ENABLED}
-          aria-describedby="testimonial-notice submit-status">{t('testimonials.form.submit')}</button>
+        <p id="submit-hint" className={styles.submitStatus}>
+          {t(ACTIONS_ENABLED ? 'testimonials.form.mailHint' : 'testimonials.form.unavailable')}
+        </p>
+        <div className={styles.actions}>
+          <button className={styles.submit} type="submit" disabled={!ACTIONS_ENABLED}
+            aria-describedby="testimonial-notice submit-hint">{t('testimonials.form.submit')}</button>
+          <button className={styles.secondaryButton} type="button" onClick={handleCopy} disabled={!ACTIONS_ENABLED}
+            aria-describedby="submit-hint">
+            {t('testimonials.form.copy')}
+          </button>
+        </div>
+        <p className={styles.submitStatus} role="status">
+          {copyState === 'copied' && t('testimonials.form.copied').replace('{email}', TESTIMONIAL_RECIPIENT)}
+        </p>
+        {copyState === 'failed' && (
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="testimonial-copy-fallback">
+              {t('testimonials.form.copyFailed').replace('{email}', TESTIMONIAL_RECIPIENT)}
+            </label>
+            <textarea id="testimonial-copy-fallback" ref={fallbackRef} className={`${styles.input} ${styles.textarea}`}
+              value={fallbackText} readOnly rows={10} onFocus={(event) => event.target.select()} />
+          </div>
+        )}
       </form>
     </div>
   );

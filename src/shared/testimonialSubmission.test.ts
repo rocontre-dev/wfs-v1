@@ -4,7 +4,9 @@ import test from 'node:test';
 import {
   SERVICE_IDS,
   TESTIMONIAL_LIMITS,
-  TESTIMONIAL_NOTICE_VERSION,
+  TESTIMONIAL_RECIPIENT,
+  buildTestimonialMailto,
+  buildTestimonialMessage,
   validateTestimonialSubmission,
   type FieldError,
   type TestimonialSubmission,
@@ -15,9 +17,6 @@ const valid = (): TestimonialSubmission => ({
   email: '  Visitor@Example.com ',
   serviceId: 'planning',
   text: 'La orientación fue clara y me ayudó a organizar mis decisiones financieras.',
-  noticeVersion: TESTIMONIAL_NOTICE_VERSION,
-  language: 'es',
-  honeypot: '',
 });
 
 const errorsFor = (overrides: Partial<TestimonialSubmission>): FieldError[] => {
@@ -30,15 +29,16 @@ test('accepts a complete submission and normalizes its fields', () => {
   assert.equal(result.ok, true);
   if (result.ok) {
     assert.equal(result.value.name, 'M. González');
-    assert.equal(result.value.email, 'visitor@example.com');
+    // The email is kept as typed; only surrounding spaces are removed.
+    assert.equal(result.value.email, 'Visitor@Example.com');
     assert.equal(result.value.text, 'Línea uno\n' + 'x'.repeat(30));
     assert.equal(result.value.serviceId, 'planning');
-    assert.equal(result.value.language, 'es');
+    assert.deepEqual(Object.keys(result.value).sort(), ['email', 'name', 'serviceId', 'text']);
   }
 });
 
 test('requires every visible field', () => {
-  const result = validateTestimonialSubmission({ noticeVersion: TESTIMONIAL_NOTICE_VERSION, language: 'en' });
+  const result = validateTestimonialSubmission({});
   assert.equal(result.ok, false);
   if (!result.ok) {
     assert.deepEqual(result.errors, [
@@ -82,15 +82,90 @@ test('enforces testimonial text rules', () => {
   assert.deepEqual(errorsFor({ text: `${'x'.repeat(40)}\u0007` }), [{ field: 'text', code: 'invalid' }]);
 });
 
-test('rejects an outdated notice version or unsupported language', () => {
-  assert.deepEqual(errorsFor({ noticeVersion: '2000-01-01' }), [{ field: 'form', code: 'notice' }]);
-  assert.deepEqual(errorsFor({ language: 'fr' }), [{ field: 'form', code: 'invalid' }]);
+
+// Fictitious recipient (reserved .example domain); the real one is configured in TESTIMONIAL_RECIPIENT.
+const FAKE_RECIPIENT = 'testimonials@recipient.example';
+
+test('recipient stays empty until the final address is confirmed, and no mailto is built without one', () => {
+  assert.equal(TESTIMONIAL_RECIPIENT, '');
+  const result = validateTestimonialSubmission(valid());
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const message = buildTestimonialMessage(result.value, 'es', 'Planeación financiera');
+  assert.equal(buildTestimonialMailto(message), null);
+  assert.equal(buildTestimonialMailto(message, ''), null);
+  assert.equal(buildTestimonialMailto(message, '   '), null);
 });
 
-test('flags a filled honeypot', () => {
-  const result = validateTestimonialSubmission({ ...valid(), honeypot: 'bot' });
-  assert.equal(result.ok, false);
-  if (!result.ok) assert.equal(result.honeypot, true);
+// Disabled state: the component must keep both actions off while the switch is off or the recipient is empty.
+const componentSource = readFileSync(new URL('../components/Testimonials.tsx', import.meta.url), 'utf8');
+
+test('submission actions are switched off and guarded by the recipient', () => {
+  assert.match(componentSource, /const SUBMISSIONS_ENABLED = false;/);
+  assert.match(componentSource, /const ACTIONS_ENABLED = SUBMISSIONS_ENABLED && TESTIMONIAL_RECIPIENT\.trim\(\) !== '';/);
+  assert.equal((componentSource.match(/if \(!ACTIONS_ENABLED\) return;/g) ?? []).length, 2);
+  assert.equal((componentSource.match(/disabled=\{!ACTIONS_ENABLED\}/g) ?? []).length, 2);
+});
+
+const mailtoParts = (link: string) => {
+  const [address, query] = link.slice('mailto:'.length).split('?');
+  const params = Object.fromEntries(query.split('&').map((pair) => {
+    const [key, value] = pair.split('=');
+    return [key, decodeURIComponent(value)];
+  }));
+  return { address, query, subject: params.subject, body: params.body };
+};
+
+test('builds a mailto link with encoded subject and body', () => {
+  const result = validateTestimonialSubmission({
+    ...valid(),
+    name: 'José Pérez',
+    text: 'Línea uno & más?\nLínea dos #1 con 100% de confianza, ¡gracias!',
+  });
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+
+  const link = buildTestimonialMailto(buildTestimonialMessage(result.value, 'es', 'Planeación financiera'), FAKE_RECIPIENT);
+  assert.ok(link);
+  const { address, query, subject, body } = mailtoParts(link);
+  assert.equal(address, FAKE_RECIPIENT);
+  // Only the two parameters; special characters are percent-encoded inside them.
+  assert.deepEqual(query.split('&').map((pair) => pair.split('=')[0]), ['subject', 'body']);
+  assert.ok(!/[\s&?#%](?![0-9A-F]{2})/.test(query.replace(/^subject=|&body=/g, '')));
+  assert.equal(subject, 'Testimonio para el sitio web: José Pérez');
+  assert.equal(body, [
+    'Nombre público o iniciales: José Pérez',
+    'Correo de contacto: Visitor@Example.com',
+    'Servicio contratado: Planeación financiera',
+    '',
+    'Testimonio:',
+    'Línea uno & más?',
+    'Línea dos #1 con 100% de confianza, ¡gracias!',
+    '',
+    'Autorizo la posible publicación de este testimonio en el sitio. Puede editarse ligeramente para mayor claridad, sin cambiar su significado. Mi correo no se publicará.',
+  ].join('\r\n'));
+});
+
+test('uses the English template for English submissions', () => {
+  const result = validateTestimonialSubmission(valid());
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const link = buildTestimonialMailto(buildTestimonialMessage(result.value, 'en', 'Financial Planning'), FAKE_RECIPIENT);
+  assert.ok(link);
+  const { subject, body } = mailtoParts(link);
+  assert.equal(subject, 'Testimonial for the website: M. González');
+  assert.ok(body.startsWith('Public name or initials: M. González\r\nContact email: Visitor@Example.com\r\nContracted service: Financial Planning'));
+  assert.ok(body.endsWith('My email will not be published.'));
+});
+
+test('"Copy message" text is the prepared body with plain line breaks', () => {
+  const result = validateTestimonialSubmission(valid());
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const { body } = buildTestimonialMessage(result.value, 'es', 'Planeación financiera');
+  assert.ok(!body.includes('\r'));
+  assert.ok(body.includes('Correo de contacto: Visitor@Example.com\nServicio contratado: Planeación financiera'));
+  assert.ok(body.includes(result.value.text));
 });
 
 
@@ -116,7 +191,12 @@ test('ES and EN define the same non-empty testimonial and form texts', () => {
   const required = [
     'testimonials.share',
     'testimonials.form.close',
+    'testimonials.form.submit',
+    'testimonials.form.mailHint',
     'testimonials.form.unavailable',
+    'testimonials.form.copy',
+    'testimonials.form.copied',
+    'testimonials.form.copyFailed',
     ...[1, 2, 3].flatMap((n) => ['Name', 'Role', 'Content'].map((field) => `testimonials.t${n}${field}`)),
     ...SERVICE_IDS.map((id) =>
       id === 'other' || id === 'unspecified' ? `testimonials.form.service.${id}` : `services.${id}`),
@@ -132,7 +212,6 @@ test('every validation error the form can show has an ES and EN message', () => 
     ['email', ['required', 'too_long', 'invalid']],
     ['serviceId', ['required', 'invalid']],
     ['text', ['required', 'too_short', 'too_long', 'invalid']],
-    ['form', ['notice', 'invalid']],
   ];
   for (const language of ['es', 'en'] as const) {
     const entries = dictionary(language);

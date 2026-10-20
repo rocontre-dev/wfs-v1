@@ -1,37 +1,68 @@
-# Testimonial submission: pending server work
+# Testimonial submission (mailto)
 
-## Current state
+## Current status: actions temporarily disabled
 
-The "Share your experience" form collects a draft in browser memory only. Its submit button is disabled (`SUBMISSION_ENABLED = false` in `src/components/Testimonials.tsx`) and a visible message explains that submission is not available yet. Nothing is sent and no database is used.
+Until Goyo's final address is confirmed, `SUBMISSIONS_ENABLED = false` in
+`src/components/Testimonials.tsx` and `TESTIMONIAL_RECIPIENT = ''` in `src/shared/testimonialSubmission.ts`.
+"Share your experience" and the form (including the draft) work, but "Send by email" and "Copy message" are
+disabled, pressing Enter in the form does nothing, and the form shows "Testimonial submissions will be
+available soon." No recipient address is shown in the interface or included in the build.
 
-## Pending before enabling submission
+Safety check: the actions also stay disabled while `TESTIMONIAL_RECIPIENT` is empty, even if
+`SUBMISSIONS_ENABLED` is set to `true` by mistake, and `buildTestimonialMailto` returns no link without a
+recipient.
 
-1. Confirm the Hostinger product for this site (Website Builder, shared hosting, Cloud, Node.js Web App, or VPS). This decides whether the endpoint is Node.js or PHP. Implement only the compatible one.
-2. Implement a same-origin server endpoint that:
-   - Re-validates every field with the rules in `src/shared/testimonialSubmission.ts` (with Node.js, import it directly; with PHP, port it and add equivalent tests).
-   - Keeps its own trusted copy of the ES/EN notice and accepts only notice version `2026-10-17`.
-   - Escapes all visitor text when building the email (HTML escaping belongs on the server).
-   - Defines duplicate/retry handling and request-abuse limits based on what Hostinger actually provides.
-   - Reports success only after the mail provider accepts the message.
-3. Connect the form to that endpoint and set `SUBMISSION_ENABLED` to `true` only in that same change.
+To reactivate: set `TESTIMONIAL_RECIPIENT` (see "Recipient") to Goyo's address, set
+`SUBMISSIONS_ENABLED = true`, rebuild, and test with a real mail app. The flow below describes the
+behavior once reactivated.
 
-## Private server configuration
+## How it works
 
-These values live only in server environment variables or Hostinger's private configuration. Never in frontend code, `VITE_` variables, or source control.
+1. "Share your experience" opens the form (hidden at first): name, email, contracted service, testimonial.
+2. "Send by email" validates the fields in the browser (`validateTestimonialSubmission` in
+   `src/shared/testimonialSubmission.ts`) and, directly from that click, opens a `mailto:` link built by
+   `buildTestimonialMailto` in the same file.
+3. The visitor's mail app opens with the recipient, subject and body filled in. **The visitor sends it from
+   there.** The site never sends anything and never says the message was sent. The form then closes and
+   focus returns to "Share your experience"; the draft stays in memory, so reopening the form restores it.
+   With validation errors the form stays open and focus moves to the first invalid field.
+4. Secondary option, "Copy message": copies the same prepared body to the clipboard (after the same
+   validation). If the clipboard is unavailable or refused, the text is shown selected in a read-only box so
+   it can be copied by hand, together with the recipient address.
 
-```text
-TESTIMONIALS_TO_EMAIL=<TEST_RECIPIENT>
-TESTIMONIALS_FROM_EMAIL=
-TESTIMONIALS_SMTP_HOST=
-TESTIMONIALS_SMTP_PORT=
-TESTIMONIALS_SMTP_SECURE=
-TESTIMONIALS_SMTP_USER=
-TESTIMONIALS_SMTP_PASSWORD=
-```
+There is no server endpoint, database, SMTP, or credentials. The site is static: upload the contents of
+`dist/` to `public_html/`.
 
-- `TESTIMONIALS_TO_EMAIL`: required. While testing, set it to the test recipient address already agreed with the project owner (intentionally not written in this public repository), only in the server configuration. Replace it with Goyo's confirmed address before production. The browser never chooses or sees the recipient.
-- `TESTIMONIALS_FROM_EMAIL`: a mailbox authorized by the SMTP provider and aligned with SPF, DKIM, and DMARC. The visitor's address is used only as `Reply-To`.
+## Message contents
+
+Subject: `Testimonio para el sitio web: <name>` (or the English equivalent, based on the page language).
+
+Body: public name or initials, contact email, contracted service label, testimonial, and a short
+authorization sentence matching the notice shown in the form. Subject and body are encoded separately
+with `encodeURIComponent`, so accents, line breaks and characters such as `& ? # %` are preserved.
+
+The email typed in the form is kept as typed (only leading and trailing spaces are removed) and is
+contact information inside the message. It does not control which
+account sends the email; that is whatever account the visitor's mail app uses.
+
+## Recipient
+
+`TESTIMONIAL_RECIPIENT` in `src/shared/testimonialSubmission.ts` is **empty** until Goyo's address is
+confirmed. Once set, the address is public with mailto (visible in the page source and the visitor's mail
+app); it is not a secret. Tests use a fictitious `.example` address and never the real one.
+
+## Limitations
+
+- The visitor needs a configured mail app (or a browser handler for `mailto:` links). Without one,
+  clicking may do nothing or open a setup prompt; the site cannot detect this.
+- The site cannot know whether the visitor actually sent the email.
+- The draft stays in the form after the mail app opens, and while the form is closed, reopened or the
+  language is switched. It is lost on page reload.
+- Very long testimonials produce long links; the 1500-character limit keeps them within what common
+  mail apps accept.
 
 ## Publication
 
-The page shows the three original testimonials (`testimonials.t1*`–`t3*` in `src/context/LanguageContext.tsx`). Submissions are never published automatically; a testimonial appears only after someone adds it manually, without the email or the contracted service.
+The page shows the three original testimonials (`testimonials.t1*`–`t3*` in
+`src/context/LanguageContext.tsx`). Submissions are never published automatically; a testimonial appears
+only after someone adds it manually, without the email or the contracted service.
