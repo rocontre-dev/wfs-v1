@@ -1,20 +1,46 @@
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { Mail, Phone, MapPin, Send, Clock, MessageCircle } from 'lucide-react';
+import { buildTestimonialMailto } from '../shared/testimonialSubmission';
 import styles from './Contact.module.css';
+
+// Recipient of the contact form (Goyo's address). With mailto it is public (visible in the page source
+// and the visitor's mail app). Testimonials, contact links and the footer use the same address.
+const CONTACT_FORM_RECIPIENT: string = 'goyo.lenero1@gmail.com';
+
+// Translation keys of the visible option labels, so the email shows the text the visitor selected.
+const INTEREST_LABEL_KEYS: Record<string, string> = {
+  protection: 'contact.interest.protection',
+  investments: 'contact.interest.investments',
+  retirement: 'contact.interest.retirement',
+  education: 'contact.interest.education',
+  wealth: 'contact.interest.wealth',
+  other: 'contact.location.other',
+};
+
+const LOCATION_LABEL_KEYS: Record<string, string> = {
+  canada: 'contact.location.canada',
+  usa: 'contact.location.usa',
+  mexico: 'contact.location.mexico',
+  other: 'contact.location.other',
+};
+
+// WhatsApp number for the floating button (digits only, with country code). Empty until a number with
+// WhatsApp is confirmed; while empty the button is not shown.
+const FLOATING_WHATSAPP_NUMBER: string = '';
+
+const EMPTY_FORM = {
+  name: '',
+  email: '',
+  phone: '',
+  primaryInterest: '',
+  location: '',
+  message: '',
+};
 
 const Contact = () => {
   const { t } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    primaryInterest: '',
-    location: '',
-    message: '',
-  });
-  const [submitted, setSubmitted] = useState(false);
-
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -22,42 +48,62 @@ const Contact = () => {
     });
   };
 
+  // The browser validates the fields (required, email format) before this runs. The full message is built
+  // first, then the visitor's mail app is opened with it and the form is reset to its initial state. The
+  // visitor sends the email from that app, so the page never claims the message was sent.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    setSubmitted(true);
-    setFormData({ name: '', email: '', phone: '', primaryInterest: '', location: '', message: '' });
-    
-    // Reset success message after 5 seconds
-    setTimeout(() => setSubmitted(false), 5000);
+    const value = (text: string) => text.trim() || '—';
+    const optionLabel = (keys: Record<string, string>, selected: string) =>
+      keys[selected] ? t(keys[selected]) : '—';
+    const name = formData.name.trim();
+    const body = [
+      `${t('contact.name')}: ${name}`,
+      `${t('contact.email')}: ${formData.email.trim()}`,
+      `${t('contact.phone')}: ${value(formData.phone)}`,
+      `${t('contact.primaryInterest')}: ${optionLabel(INTEREST_LABEL_KEYS, formData.primaryInterest)}`,
+      `${t('contact.location')}: ${optionLabel(LOCATION_LABEL_KEYS, formData.location)}`,
+      '',
+      `${t('contact.message')}:`,
+      value(formData.message),
+    ].join('\n');
+    const link = buildTestimonialMailto({ subject: `${t('contact.mailSubject')}: ${name}`, body }, CONTACT_FORM_RECIPIENT);
+    if (!link) return;
+    window.location.href = link;
+    setFormData(EMPTY_FORM);
   };
 
-  // Contact cards with Mexico and Canada numbers - improved separation
+  // Contact cards. A card is shown only when it has a phone number.
   const contactCards = [
     {
-      icon: <MessageCircle size={24} />,
+      // Mexico: calls confirmed by Goyo. WhatsApp and SMS are not confirmed yet; fill in whatsappNumber
+      // (digits only) or set sms to true only once they are.
+      icon: <Phone size={24} />,
       country: t('contact.countryMexico'),
-      label: t('contact.mexico'),
-      phone: '+52 55 1234 5678',
-      whatsappNumber: '525512345678',
-      methods: [t('contact.methodWhatsApp'), t('contact.methodCalls')],
+      label: '',
+      phone: '+52 333 559 8672',
+      whatsappNumber: '',
+      sms: false,
+      methods: [] as string[],
     },
     {
+      // Canada: calls and SMS only (this number has no WhatsApp).
       icon: <Phone size={24} />,
       country: t('contact.countryCanada'),
-      label: t('contact.canada'),
+      label: '',
       phone: '+1 250-608-8218',
-      whatsappNumber: '12506088218',
-      methods: [t('contact.methodCalls'), t('contact.methodTexts')],
+      whatsappNumber: '',
+      sms: true,
+      methods: [] as string[],
     },
-  ];
+  ].filter((card) => card.phone !== '');
 
   const otherContactInfo = [
     {
       icon: <Mail size={24} />,
       label: t('footer.email'),
       value: t('footer.email'),
-      href: 'mailto:contacto@gregorolenro.com',
+      href: 'mailto:goyo.lenero1@gmail.com',
     },
     {
       icon: <MapPin size={24} />,
@@ -80,6 +126,11 @@ const Contact = () => {
   // Handle phone call click
   const handleCallClick = (phone: string) => {
     window.location.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+  };
+
+  // Handle SMS click
+  const handleSmsClick = (phone: string) => {
+    window.location.href = `sms:${phone.replace(/[^0-9+]/g, '')}`;
   };
 
   return (
@@ -107,15 +158,17 @@ const Contact = () => {
                     <div className={styles.contactCardIcon}>{card.icon}</div>
                   </div>
                   <div className={styles.contactCardContent}>
-                    <span className={styles.contactCardLabel}>{card.label}</span>
+                    {card.label && <span className={styles.contactCardLabel}>{card.label}</span>}
                     <a href={`tel:${card.phone.replace(/[^0-9+]/g, '')}`} className={styles.contactCardPhoneLink}>
                       <span className={styles.contactCardPhone}>{card.phone}</span>
                     </a>
-                    <div className={styles.contactMethods}>
-                      {card.methods.map((method, i) => (
-                        <span key={i} className={styles.contactMethod}>{method}</span>
-                      ))}
-                    </div>
+                    {card.methods.length > 0 && (
+                      <div className={styles.contactMethods}>
+                        {card.methods.map((method, i) => (
+                          <span key={i} className={styles.contactMethod}>{method}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className={styles.contactCardActions}>
                     {card.whatsappNumber && (
@@ -136,6 +189,16 @@ const Contact = () => {
                       <Phone size={18} />
                       <span>{t('contact.call')}</span>
                     </button>
+                    {card.sms && (
+                      <button
+                        className={styles.callBtn}
+                        onClick={() => handleSmsClick(card.phone)}
+                        aria-label={`${t('contact.sms')} - ${card.phone}`}
+                      >
+                        <MessageCircle size={18} />
+                        <span>{t('contact.sms')}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -162,12 +225,7 @@ const Contact = () => {
           </div>
 
           <div className={styles.formWrapper}>
-            {submitted ? (
-              <div className={styles.successMessage}>
-                <p>{t('contact.successMessage')}</p>
-              </div>
-            ) : (
-              <>
+            <>
                 <p className={styles.formIntro}>{t('contact.formIntro')}</p>
                 <form className={styles.form} onSubmit={handleSubmit}>
                   <div className={styles.formRow}>
@@ -183,6 +241,7 @@ const Contact = () => {
                         placeholder={t('contact.namePlaceholder')}
                         value={formData.name}
                         onChange={handleChange}
+                        pattern=".*\S.*"
                         required
                       />
                     </div>
@@ -277,28 +336,32 @@ const Contact = () => {
                     />
                   </div>
 
-                  <button type="submit" className="btn btn--primary btn--large btn--full">
+                  <p id="contact-mail-hint" className={styles.mailHint}>{t('contact.mailHint')}</p>
+
+                  <button type="submit" className="btn btn--primary btn--large btn--full"
+                    aria-describedby="contact-mail-hint">
                     {t('contact.submit')}
                     <Send size={20} />
                   </button>
                 </form>
-              </>
-            )}
+            </>
           </div>
         </div>
       </div>
 
-      {/* Floating WhatsApp Button with improved message */}
-      <a
-        href={`https://wa.me/525512345678?text=${encodeURIComponent(t('contact.whatsappMessage'))}`}
-        className={styles.floatingWhatsapp}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={t('contact.floatingWhatsapp')}
-      >
-        <MessageCircle size={28} />
-        <span className={styles.floatingWhatsappText}>{t('contact.floatingWhatsapp')}</span>
-      </a>
+      {/* Floating WhatsApp Button: hidden while FLOATING_WHATSAPP_NUMBER is empty */}
+      {FLOATING_WHATSAPP_NUMBER && (
+        <a
+          href={`https://wa.me/${FLOATING_WHATSAPP_NUMBER}?text=${encodeURIComponent(t('contact.whatsappMessage'))}`}
+          className={styles.floatingWhatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t('contact.floatingWhatsapp')}
+        >
+          <MessageCircle size={28} />
+          <span className={styles.floatingWhatsappText}>{t('contact.floatingWhatsapp')}</span>
+        </a>
+      )}
     </section>
   );
 };

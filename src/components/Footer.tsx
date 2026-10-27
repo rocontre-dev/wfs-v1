@@ -55,7 +55,7 @@ const Footer = () => {
               ))}
             </div>
 
-            <a href="mailto:contacto@gregorolenro.com" className={styles.emailLink}>
+            <a href="mailto:goyo.lenero1@gmail.com" className={styles.emailLink}>
               <Mail size={16} />
               <span>{t('footer.email')}</span>
             </a>

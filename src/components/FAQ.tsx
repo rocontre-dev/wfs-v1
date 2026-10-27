@@ -53,13 +53,6 @@ const FAQ = () => {
             </div>
           ))}
         </div>
-
-        <div className={styles.ctaWrapper}>
-          <p className={styles.ctaText}>{t('faq.ctaText')}</p>
-          <a href="#contact" className="btn btn--primary btn--large">
-            {t('hero.cta')}
-          </a>
-        </div>
       </div>
     </section>
   );

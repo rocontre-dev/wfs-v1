@@ -64,12 +64,6 @@ const Process = () => {
             </div>
           ))}
         </div>
-
-        <div className={styles.ctaWrapper}>
-          <a href="#contact" className="btn btn--primary btn--large">
-            {t('hero.cta')}
-          </a>
-        </div>
       </div>
     </section>
   );
