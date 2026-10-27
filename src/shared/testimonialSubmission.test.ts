@@ -86,22 +86,24 @@ test('enforces testimonial text rules', () => {
 // Fictitious recipient (reserved .example domain); the real one is configured in TESTIMONIAL_RECIPIENT.
 const FAKE_RECIPIENT = 'testimonials@recipient.example';
 
-test('recipient stays empty until the final address is confirmed, and no mailto is built without one', () => {
-  assert.equal(TESTIMONIAL_RECIPIENT, '');
+test('recipient is configured, and no mailto is built without one', () => {
+  assert.notEqual(TESTIMONIAL_RECIPIENT, '');
+  assert.equal(TESTIMONIAL_RECIPIENT, TESTIMONIAL_RECIPIENT.trim());
+  assert.deepEqual(errorsFor({ email: TESTIMONIAL_RECIPIENT }), []);
   const result = validateTestimonialSubmission(valid());
   assert.equal(result.ok, true);
   if (!result.ok) return;
   const message = buildTestimonialMessage(result.value, 'es', 'Planeación financiera');
-  assert.equal(buildTestimonialMailto(message), null);
+  assert.ok(buildTestimonialMailto(message)?.startsWith(`mailto:${TESTIMONIAL_RECIPIENT}?subject=`));
   assert.equal(buildTestimonialMailto(message, ''), null);
   assert.equal(buildTestimonialMailto(message, '   '), null);
 });
 
-// Disabled state: the component must keep both actions off while the switch is off or the recipient is empty.
+// Enabled state: both actions are on, but the component still switches them off if the recipient is empty.
 const componentSource = readFileSync(new URL('../components/Testimonials.tsx', import.meta.url), 'utf8');
 
-test('submission actions are switched off and guarded by the recipient', () => {
-  assert.match(componentSource, /const SUBMISSIONS_ENABLED = false;/);
+test('submission actions are switched on and still guarded by the recipient', () => {
+  assert.match(componentSource, /const SUBMISSIONS_ENABLED = true;/);
   assert.match(componentSource, /const ACTIONS_ENABLED = SUBMISSIONS_ENABLED && TESTIMONIAL_RECIPIENT\.trim\(\) !== '';/);
   assert.equal((componentSource.match(/if \(!ACTIONS_ENABLED\) return;/g) ?? []).length, 2);
   assert.equal((componentSource.match(/disabled=\{!ACTIONS_ENABLED\}/g) ?? []).length, 2);
@@ -156,6 +158,25 @@ test('uses the English template for English submissions', () => {
   assert.equal(subject, 'Testimonial for the website: M. González');
   assert.ok(body.startsWith('Public name or initials: M. González\r\nContact email: Visitor@Example.com\r\nContracted service: Financial Planning'));
   assert.ok(body.endsWith('My email will not be published.'));
+});
+
+test('the default mailto goes to the configured recipient in ES and EN', () => {
+  const result = validateTestimonialSubmission(valid());
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const cases = [
+    ['es', 'Planeación financiera', 'Testimonio para el sitio web: M. González', 'Correo de contacto: Visitor@Example.com'],
+    ['en', 'Financial Planning', 'Testimonial for the website: M. González', 'Contact email: Visitor@Example.com'],
+  ] as const;
+  for (const [language, service, expectedSubject, expectedEmailLine] of cases) {
+    const link = buildTestimonialMailto(buildTestimonialMessage(result.value, language, service));
+    assert.ok(link, language);
+    const { address, subject, body } = mailtoParts(link);
+    assert.equal(address, TESTIMONIAL_RECIPIENT, language);
+    assert.equal(subject, expectedSubject, language);
+    assert.ok(body.includes(expectedEmailLine), language);
+    assert.ok(body.includes(result.value.text), language);
+  }
 });
 
 test('"Copy message" text is the prepared body with plain line breaks', () => {

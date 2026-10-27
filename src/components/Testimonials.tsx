@@ -16,10 +16,9 @@ import {
 } from '../shared/testimonialSubmission';
 import styles from './Testimonials.module.css';
 
-// Temporarily off until Goyo's final address replaces TESTIMONIAL_RECIPIENT. While off, the form and
-// draft keep working but "Send by email" and "Copy message" are disabled and Enter does nothing.
-// Set to true to reactivate both actions; they also stay off while TESTIMONIAL_RECIPIENT is empty.
-const SUBMISSIONS_ENABLED = false;
+// "Send by email" and "Copy message" are on. Set to false to switch both off temporarily (the form and
+// draft keep working, Enter does nothing). They also stay off while TESTIMONIAL_RECIPIENT is empty.
+const SUBMISSIONS_ENABLED = true;
 const ACTIONS_ENABLED = SUBMISSIONS_ENABLED && TESTIMONIAL_RECIPIENT.trim() !== '';
 
 const FORM_PANEL_ID = 'testimonial-form-panel';

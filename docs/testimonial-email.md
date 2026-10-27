@@ -1,20 +1,18 @@
 # Testimonial submission (mailto)
 
-## Current status: actions temporarily disabled
+## Current status: enabled
 
-Until Goyo's final address is confirmed, `SUBMISSIONS_ENABLED = false` in
-`src/components/Testimonials.tsx` and `TESTIMONIAL_RECIPIENT = ''` in `src/shared/testimonialSubmission.ts`.
-"Share your experience" and the form (including the draft) work, but "Send by email" and "Copy message" are
-disabled, pressing Enter in the form does nothing, and the form shows "Testimonial submissions will be
-available soon." No recipient address is shown in the interface or included in the build.
+`SUBMISSIONS_ENABLED = true` in `src/components/Testimonials.tsx` and
+`TESTIMONIAL_RECIPIENT = 'goyo.lenero1@gmail.com'` in `src/shared/testimonialSubmission.ts`.
+"Send by email" and "Copy message" are active, and the form shows the hint that the visitor's mail app will
+open with the message ready.
 
-Safety check: the actions also stay disabled while `TESTIMONIAL_RECIPIENT` is empty, even if
-`SUBMISSIONS_ENABLED` is set to `true` by mistake, and `buildTestimonialMailto` returns no link without a
-recipient.
+Safety check: the actions stay disabled while `TESTIMONIAL_RECIPIENT` is empty, even if
+`SUBMISSIONS_ENABLED` is `true`, and `buildTestimonialMailto` returns no link without a recipient.
 
-To reactivate: set `TESTIMONIAL_RECIPIENT` (see "Recipient") to Goyo's address, set
-`SUBMISSIONS_ENABLED = true`, rebuild, and test with a real mail app. The flow below describes the
-behavior once reactivated.
+To switch off temporarily: set `SUBMISSIONS_ENABLED = false` and rebuild. The form and draft keep working,
+both actions are disabled, pressing Enter does nothing, and the form shows "Testimonial submissions will be
+available soon."
 
 ## How it works
 
@@ -47,9 +45,10 @@ account sends the email; that is whatever account the visitor's mail app uses.
 
 ## Recipient
 
-`TESTIMONIAL_RECIPIENT` in `src/shared/testimonialSubmission.ts` is **empty** until Goyo's address is
-confirmed. Once set, the address is public with mailto (visible in the page source and the visitor's mail
-app); it is not a secret. Tests use a fictitious `.example` address and never the real one.
+`TESTIMONIAL_RECIPIENT` in `src/shared/testimonialSubmission.ts` is Goyo's final address,
+`goyo.lenero1@gmail.com`. With mailto the address is public (visible in the page source and the visitor's
+mail app); it is not a secret and may attract spam. Tests read the address from the constant instead of
+repeating it, and use a fictitious `.example` address for the encoding checks.
 
 ## Limitations
 

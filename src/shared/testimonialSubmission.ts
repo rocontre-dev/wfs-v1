@@ -126,10 +126,10 @@ export function validateTestimonialSubmission(
   return { ok: true, value: { name, email, serviceId: serviceId as ServiceId, text } };
 }
 
-// Recipient of the prepared email. Empty until Goyo's address is confirmed; while empty, the form cannot
-// open mailto or copy the message. Once set, it is visible in the page source (mailto is public).
+// Recipient of the prepared email (Goyo's final address). It is visible in the page source (mailto is
+// public). If it is ever left empty, the form cannot open mailto or copy the message.
 // See docs/testimonial-email.md.
-export const TESTIMONIAL_RECIPIENT: string = '';
+export const TESTIMONIAL_RECIPIENT: string = 'goyo.lenero1@gmail.com';
 
 const MAIL_TEXT = {
   es: {
