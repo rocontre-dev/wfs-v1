@@ -209,7 +209,8 @@
   background-color: var(--color-gray-700);
 }
 
-.ctaButton {
+/* Scoped under .actions so it wins over the global .btn rule (globals.css loads after module CSS). */
+.actions .ctaButton {
   display: none;
   white-space: nowrap;
 }
@@ -238,6 +239,57 @@
   background-color: var(--color-gray-800);
 }
 
+/* Mobile Styles: compact header so logo, name, language, theme and menu fit */
+@media (max-width: 1023px) {
+  .container {
+    gap: var(--space-2);
+  }
+
+  .logo {
+    min-width: 0;
+    gap: var(--space-2);
+  }
+
+  .logoIcon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    font-size: var(--text-base);
+  }
+
+  .logoText {
+    min-width: 0;
+  }
+
+  .logoName {
+    font-size: var(--text-base);
+  }
+
+  .actions {
+    flex-shrink: 0;
+    gap: var(--space-2);
+  }
+}
+
+@media (max-width: 374px) {
+  .logoIcon {
+    width: 36px;
+    height: 36px;
+    font-size: var(--text-sm);
+  }
+
+  .logoTitle {
+    letter-spacing: 0.5px;
+  }
+
+  .langButton,
+  .themeButton,
+  .mobileToggle {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 /* Desktop Styles */
 @media (min-width: 1024px) {
   .nav {
@@ -259,7 +311,7 @@
     font-size: var(--text-sm);
   }
 
-  .ctaButton {
+  .actions .ctaButton {
     display: inline-flex;
   }
 

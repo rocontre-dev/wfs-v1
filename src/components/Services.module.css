@@ -14,7 +14,8 @@
 /* Grid */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* min() lets a card shrink below 300px when the screen is narrower than that. */
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: var(--space-6);
   margin-bottom: var(--space-12);
 }
@@ -65,4 +66,19 @@
 /* CTA */
 .ctaWrapper {
   text-align: center;
+}
+
+/* The text wraps instead of widening the page; max-width includes the padding (border-box). */
+.ctaWrapper :global(.btn) {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+/* Mobile: same size as the Home buttons */
+@media (max-width: 1023px) {
+  .ctaWrapper :global(.btn) {
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-base);
+  }
 }

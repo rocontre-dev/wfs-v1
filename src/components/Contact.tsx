@@ -76,14 +76,13 @@ const Contact = () => {
   // Contact cards. A card is shown only when it has a phone number.
   const contactCards = [
     {
-      // Mexico: calls confirmed by Goyo. WhatsApp and SMS are not confirmed yet; fill in whatsappNumber
-      // (digits only) or set sms to true only once they are.
+      // Mexico: calls, WhatsApp and SMS confirmed by Goyo.
       icon: <Phone size={24} />,
       country: t('contact.countryMexico'),
       label: '',
       phone: '+52 333 559 8672',
-      whatsappNumber: '',
-      sms: false,
+      whatsappNumber: '523335598672',
+      sms: true,
       methods: [] as string[],
     },
     {
@@ -117,21 +116,8 @@ const Contact = () => {
     },
   ];
 
-  // Handle WhatsApp click with improved message including form data
-  const handleWhatsAppClick = (whatsappNumber: string) => {
-    const message = encodeURIComponent(t('contact.whatsappMessage'));
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-  };
-
-  // Handle phone call click
-  const handleCallClick = (phone: string) => {
-    window.location.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
-  };
-
-  // Handle SMS click
-  const handleSmsClick = (phone: string) => {
-    window.location.href = `sms:${phone.replace(/[^0-9+]/g, '')}`;
-  };
+  // Phone number as used in tel: and sms: links (digits and leading +).
+  const dialable = (phone: string) => phone.replace(/[^0-9+]/g, '');
 
   return (
     <section id="contact" className={`section section--gray ${styles.contact}`}>
@@ -159,7 +145,7 @@ const Contact = () => {
                   </div>
                   <div className={styles.contactCardContent}>
                     {card.label && <span className={styles.contactCardLabel}>{card.label}</span>}
-                    <a href={`tel:${card.phone.replace(/[^0-9+]/g, '')}`} className={styles.contactCardPhoneLink}>
+                    <a href={`tel:${dialable(card.phone)}`} className={styles.contactCardPhoneLink}>
                       <span className={styles.contactCardPhone}>{card.phone}</span>
                     </a>
                     {card.methods.length > 0 && (
@@ -172,32 +158,34 @@ const Contact = () => {
                   </div>
                   <div className={styles.contactCardActions}>
                     {card.whatsappNumber && (
-                      <button
+                      <a
+                        href={`https://wa.me/${card.whatsappNumber}`}
                         className={styles.whatsappBtn}
-                        onClick={() => handleWhatsAppClick(card.whatsappNumber)}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         aria-label={`${t('contact.whatsapp')} - ${card.phone}`}
                       >
                         <MessageCircle size={18} />
                         <span>{t('contact.whatsapp')}</span>
-                      </button>
+                      </a>
                     )}
-                    <button
+                    <a
+                      href={`tel:${dialable(card.phone)}`}
                       className={styles.callBtn}
-                      onClick={() => handleCallClick(card.phone)}
                       aria-label={`${t('contact.call')} - ${card.phone}`}
                     >
                       <Phone size={18} />
                       <span>{t('contact.call')}</span>
-                    </button>
+                    </a>
                     {card.sms && (
-                      <button
+                      <a
+                        href={`sms:${dialable(card.phone)}`}
                         className={styles.callBtn}
-                        onClick={() => handleSmsClick(card.phone)}
                         aria-label={`${t('contact.sms')} - ${card.phone}`}
                       >
                         <MessageCircle size={18} />
                         <span>{t('contact.sms')}</span>
-                      </button>
+                      </a>
                     )}
                   </div>
                 </div>

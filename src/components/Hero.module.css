@@ -56,6 +56,8 @@
   text-align: center;
   max-width: 800px;
   margin: 0 auto;
+  /* Lets the grid column shrink to the viewport instead of growing to its widest child. */
+  min-width: 0;
 }
 
 .badgeWrapper {
@@ -313,6 +315,40 @@
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
+}
+
+/* All widths. Scoped under .hero so it wins over the global .container padding (globals.css loads after
+   module CSS); keeps the badge clear of the fixed header and the stats off the section edge. On desktop
+   the content is taller than the viewport, so without it the badge sat right against the header. */
+.hero .container {
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-12);
+}
+
+/* Mobile Styles: buttons wrap their text and fit the screen width */
+@media (max-width: 1023px) {
+  .title {
+    overflow-wrap: break-word;
+  }
+
+  .actions :global(.btn) {
+    width: 100%;
+    max-width: 360px;
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-base);
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+@media (max-width: 374px) {
+  .title {
+    font-size: var(--text-3xl);
+  }
+
+  .description {
+    font-size: var(--text-base);
+  }
 }
 
 /* Desktop Styles */

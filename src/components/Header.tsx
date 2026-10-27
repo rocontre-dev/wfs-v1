@@ -12,6 +12,8 @@ const Header = () => {
     setLanguage(language === 'es' ? 'en' : 'es');
   };
 
+  // Dark theme currently styles only the header and the mobile menu (.dark in Header.module.css). The
+  // 'dark' class on <html> has no styles elsewhere yet, so the rest of the page stays light. See docs/theme.md.
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.documentElement.classList.toggle('dark');

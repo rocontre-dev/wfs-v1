@@ -140,6 +140,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Anchor links (menu) stop below the fixed 80px header instead of under it. */
+  scroll-padding-top: 80px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

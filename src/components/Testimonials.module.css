@@ -129,8 +129,9 @@
 .formPanel {
   max-width: 760px;
   margin: var(--space-8) auto 0;
-  /* Fixed header is 80px tall; keep the form heading visible below it. */
-  scroll-margin-top: calc(80px + var(--space-6));
+  /* The 80px fixed header is already reserved by scroll-padding-top on html (globals.css); this adds the
+     gap so the form heading sits just below it. */
+  scroll-margin-top: var(--space-6);
   padding: var(--space-8);
   background-color: var(--color-white);
   border-radius: var(--radius-3xl);
