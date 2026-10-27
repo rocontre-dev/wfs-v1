@@ -75,6 +75,7 @@
 /* Social */
 .social {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
   margin-bottom: var(--space-6);
 }
@@ -83,9 +84,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: 40px;
   height: 40px;
   background: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
   border-radius: var(--radius-lg);
   font-size: var(--text-lg);
   transition: all var(--transition-fast);
@@ -93,7 +96,14 @@
 
 .socialLink:hover {
   background: var(--color-gold-500);
+  color: var(--color-primary-950);
   transform: translateY(-2px);
+}
+
+/* Keyboard focus on the dark footer: the global ring has low contrast here, so use the same light ring as Contact. */
+.socialLink:focus-visible {
+  outline: 2px solid var(--color-primary-300);
+  outline-offset: 3px;
 }
 
 .emailLink {
